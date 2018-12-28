@@ -116,19 +116,19 @@ module RDFS
 
   # Even in production, it's better for RDFS to crash than to have threads die
   # and never run again. Makes it easier to track down issues.
-  Thread.abort_on_exception = true
+  Thread.abort_on_exception = false 
 
   # Start the server
   Thread.new do
   @server = Server.new
   end
-  sleep 1
+  sleep 6
 
   # Start the updater
   Thread.new do
     @updater = Updater.new(RDFS_UPDATE_FREQ)
   end
-  sleep 1
+  sleep 6
 
   # Start the transmitter
   @transmitter = Transmitter.new(RDFS_TRANSMIT_FREQ)

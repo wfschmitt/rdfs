@@ -71,11 +71,11 @@ module RDFS
         updated = nil
         
         # If it's not in the database, hash it and add it to the DB
-        row = RDFS_DB.execute("SELECT * FROM files WHERE name = '" + f + "'") 
+        row = RDFS_DB.execute("SELECT * FROM files WHERE `name` = '#{f}'") 
         if row.count == 0
           # It wasn't in the database, so add it
           file_hash = sha256file(full_filename)
-          sql = "INSERT INTO files (sha256, name, last_modified, updated, deleted) VALUES ('" + file_hash + "', '" + f + "', " + last_modified.to_i.to_s + ", 1, 0)"
+          sql = "INSERT INTO files (sha256, name, last_modified, updated, deleted) VALUES ('#{file_hash}','#{f}', #{last_modified.to_i}, 1, 0)"
           @logger.debug("updater: " + sql)
           RDFS_DB.execute(sql)
         else
@@ -83,8 +83,7 @@ module RDFS
           if last_modified.to_i > row[0][2].to_i
             # File has changed. Rehash it and updated the database.
             file_hash = sha256file(full_filename)
-            sql = "UPDATE files SET sha256 = '" + file_hash + "', last_modified = " + last_modified.to_i.to_s + ", updated = 1, deleted = 0 WHERE name = '" + f + "'"
-            @logger.debug("updater: " + sql)
+            sql = "UPDATE files SET sha256='#{file_hash}', last_modified = #{last_modified.to_i},updated = 1, deleted = 0 WHERE `name` = '#{f}' "
             RDFS_DB.execute(sql)
           end
         end
@@ -102,7 +101,7 @@ module RDFS
           full_filename = RDFS_PATH + "/" + filename
           unless File.exists?(full_filename)
             # File doesn't exist, so mark it deleted
-            sql = "UPDATE files SET deleted = 1 WHERE name = '" + filename + "'"
+            sql = "UPDATE files SET deleted = 1 WHERE `name` ='#{filename}'"
             @logger.debug("updater: " + sql)
             RDFS_DB.execute(sql)
           end
