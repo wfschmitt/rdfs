@@ -138,7 +138,7 @@ module RDFS
 
     # Clears the updated/deleted flags
     def clear_update_flag(filename)
-      sql = "UPDATE files SET updated = 0, deleted = 0 WHERE name = '" + filename + "'"
+      sql = "UPDATE files SET updated = 0, deleted = 0 WHERE name = '#{filename}' "
       @logger.debug("transmitter: " + sql)
       RDFS_DB.execute(sql)
     end

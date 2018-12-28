@@ -64,8 +64,8 @@ module RDFS
           
           # Add it to the local database with updated and deleted set to 0 so that
           # the client's transmitter won't try to send it to possibly non-existent nodes.
-          query = RDFS_DB.prepare("INSERT INTO files (name, sha256, last_modified, updated, deleted) VALUES (:name, :sha256, :last_modified, :updated, :deleted)")
-          query.bind_param('name', filename)
+          query = RDFS_DB.prepare("INSERT INTO files (name, sha256, last_modified, updated, deleted) VALUES (':name', :sha256, :last_modified, :updated, :deleted)")
+          query.bind_param('name', "'#{filename}'")
           query.bind_param('sha256', sha256sum)
           query.bind_param('last_modified', Time.now.to_i)
           query.bind_param('updated', '0')
