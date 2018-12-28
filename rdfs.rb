@@ -40,6 +40,7 @@ require 'uri'
 require 'net/http'
 require 'zlib'
 require 'base64'
+require 'zaru'
 
 require_relative 'lib/updater'
 require_relative 'lib/transmitter'

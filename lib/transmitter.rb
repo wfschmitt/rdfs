@@ -1,3 +1,7 @@
+
+
+require 'zaru'
+
 module RDFS
     
   class Transmitter
@@ -116,7 +120,7 @@ module RDFS
                 begin
                   response = Net::HTTP.post_form(uri,
                     'api_call' => 'delete',
-                    'filename' => filename)
+                    'filename' => filename )
                   if response.body.include?("OK")
                     clear_update_flag(filename)
                   end
@@ -138,7 +142,7 @@ module RDFS
 
     # Clears the updated/deleted flags
     def clear_update_flag(filename)
-      sql = "UPDATE files SET updated = 0, deleted = 0 WHERE name = '#{filename}' "
+      sql = "UPDATE files SET updated = 0, deleted = 0 WHERE name =" + %(#{filename}) 
       @logger.debug("transmitter: " + sql)
       RDFS_DB.execute(sql)
     end
