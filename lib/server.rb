@@ -43,50 +43,48 @@ module RDFS
       when 'add'
         filename = request.query['filename']
         final_filename = RDFS_PATH + '/' + filename
-
-        # Get SHA256 for database
-        sha256sum = Digest::SHA256.file(final_filename).hexdigest
+        # Does the path exist? If not, create it.
+        sha256sum = request.query['sha256sum']
 
         query = RDFS_DB.prepare('SELECT * FROM files WHERE sha256 = :sha256 AND name = :name ')
         query.bind_param('sha256', sha256sum)
-        query.bind_param('name', filename )
+        query.bind_param('name', filename)
         row = query.execute
+
         if row.count > 0
           # this already exists signal sucess
-          @logger.warn("add already exits")
-          return [200, 'text/plain', response_text]
-        end
-        # Does the path exist? If not, create it.
-        if filename.include?('/')
-          FileUtils.mkdir_p(File.dirname(final_filename))
-        end
+          @logger.warn('add already exits')
+          # return [200, 'text/plain', response_text]
+        else
 
-        # Decode, decompress, then save the file
-        # We could use better compression, but for now this will work.
-        File.write(final_filename, Base64.decode64(request.query['content']))
+          if filename.include?('/')
+            FileUtils.mkdir_p(File.dirname(final_filename))
+          end
+          # Decode, decompress, then save the file
+          # We could use better compression, but for now this will work.
+          File.write(final_filename, Base64.decode64(request.query['content']))
 
-
-
-        # Add it to the local database with updated and deleted set to 0 so that
-        # the client's transmitter won't try to send it to possibly non-existent nodes.
-        query = RDFS_DB.prepare('INSERT INTO files (name, sha256, last_modified, updated, deleted) VALUES (:name, :sha256, :last_modified, :updated, :deleted)')
-        query.bind_param('name', filename)
-        query.bind_param('sha256', sha256sum)
-        query.bind_param('last_modified', Time.now.to_i)
-        query.bind_param('updated', '0')
-        query.bind_param('deleted', '0')
-        query.execute
+          # Add it to the local database with updated and deleted set to 0 so that
+          # the client's transmitter won't try to send it to possibly non-existent nodes.
+          query = RDFS_DB.prepare('INSERT INTO files (name, sha256, last_modified, updated, deleted) VALUES (:name, :sha256, :last_modified, :updated, :deleted)')
+          query.bind_param('name', filename)
+          query.bind_param('sha256', sha256sum)
+          query.bind_param('last_modified', Time.now.to_i)
+          query.bind_param('updated', '0')
+          query.bind_param('deleted', '0')
+          query.execute
+      end
 
       when 'add_dup'
         filename = request.query['filename']
         sha256sum = request.query['sha256sum']
 
         # Grab the original filename
-        query = DB.prepare('SELECT name FROM files WHERE sha256 = :sha256')
+        query = RDFS_DB.prepare('SELECT name FROM files WHERE sha256 = :sha256')
         query.bind_param('sha256', sha256sum)
         row = query.execute
         if row.count > 0
-          old_name = RDFS_PATH + '/' + row[0]
+          old_name = RDFS_PATH + '/' + row.first
           new_name = RDFS_PATH + '/' + filename
           FileUtils.cp(old_name, new_name)
         else
