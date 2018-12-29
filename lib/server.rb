@@ -91,9 +91,9 @@ module RDFS
           if testxx.zero?
             warn ('dont copy on my self')
           else
-            FileUtils.cp(old_name, new_name)
+            FileUtils.cp(old_name, new_name) if File.exist?(old_name) && !File.exist?(new_name)
           end
-
+          response_text = 'OK'
         else
           # SHA256 not found
           # File deleted after query but before add_dup?
@@ -124,11 +124,7 @@ module RDFS
         query = RDFS_DB.prepare('SELECT sha256 FROM files WHERE sha256 = :sha256')
         query.bind_param('sha256', sha256sum)
         row = query.execute
-        response_text = if row.count > 0
-                          'EXISTS'
-                        else
-                          'NOT_FOUND'
-                        end
+        response_text = (row.count > 0) ? 'EXISTS' : 'NOT_FOUND'
       end
 
       [200, 'text/plain', response_text]

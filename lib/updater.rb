@@ -74,7 +74,8 @@ module RDFS
         if row.count == 0
           # It wasn't in the database, so add it
           file_hash = sha256file(full_filename)
-          sql = "INSERT INTO files (sha256, name, last_modified, updated, deleted) VALUES ('#{file_hash}',\"" + f.to_s + "\", #{last_modified.to_i}, 1, 0)"
+          sql = "INSERT INTO files (sha256, name, last_modified, updated, deleted,deleted_done) VALUES (
+              '#{file_hash}',\"" + f.to_s + "\", #{last_modified.to_i}, 1, 0, 0)"
           @logger.add(Logger::DEBUG) {sql}
           RDFS_DB.execute(sql)
         else
@@ -82,7 +83,7 @@ module RDFS
           if last_modified.to_i > row[0][2].to_i
             # File has changed. Rehash it and updated the database.
             file_hash = sha256file(full_filename)
-            sql = "UPDATE files SET sha256 = '#{file_hash}', last_modified= #{last_modified.to_i}, updated = 1, deleted = 0 WHERE name=\"" + f.to_s + '"'
+            sql = "UPDATE files SET sha256 = '#{file_hash}', last_modified= #{last_modified.to_i}, updated = 1, deleted = 0 deleted_done = 0 WHERE name=\"" + f.to_s + '"'
             @logger.add(Logger::DEBUG) {sql}
             RDFS_DB.execute(sql)
           end
@@ -95,6 +96,7 @@ module RDFS
       sql = 'SELECT name FROM files WHERE updated = 0 AND deleted = 0 AND deleted_done = 0'
       @logger.warn {sql}
       all_files = RDFS_DB.execute(sql)
+      @logger.add(@loglvl) {"todo: #{all_files.count} "}
       if all_files.count > 0
         all_files.each do |f|
           filename = f[0]
@@ -102,7 +104,7 @@ module RDFS
           next if File.exist?(full_filename)
 
           # File doesn't exist, so mark it deleted
-          sql = 'UPDATE files SET deleted = 1 WHERE name="' + filename.to_s + '"'
+          sql = 'UPDATE files SET deleted = 1, deleted_done = 0 WHERE name="' + filename.to_s + '"'
           @logger.debug {sql}
           RDFS_DB.execute(sql)
         end

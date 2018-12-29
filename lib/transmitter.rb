@@ -59,7 +59,7 @@ module RDFS
         sql = 'SELECT * FROM files WHERE updated != 0 OR deleted != 0'
         @logger.add(@loglvl) {sql}
         row = RDFS_DB.execute(sql)
-        @logger.add(@loglvl) {"nothing todo #{row.count} "}
+        @logger.add(@loglvl) {"todo: #{row.count} "}
         if row.count > 0
           nodes_row.each do |node|
             row.each do |file|
@@ -128,7 +128,7 @@ module RDFS
 
     # Clears the updated/deleted flags
     def clear_update_flag(filename)
-      sql = 'UPDATE files SET updated = 0, deleted = 0 WHERE name ="' + filename.to_s + '"'
+      sql = 'UPDATE files SET updated = 0, deleted = 0, deleted_done = 0 WHERE name ="' + filename.to_s + '"'
       @logger.add(@loglvl) {sql}
       RDFS_DB.execute(sql)
     end
