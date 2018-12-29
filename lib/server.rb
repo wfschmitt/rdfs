@@ -89,7 +89,7 @@ module RDFS
           new_name= RDFS_PATH + '/' +new_name
           testxx = (new_name <=> old_name)
           if testxx.zero?
-            @logger.warn {'dont copy on my self'}
+            warn ('dont copy on my self')
           else
             FileUtils.cp(old_name, new_name)
           end

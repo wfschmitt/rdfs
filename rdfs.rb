@@ -69,10 +69,10 @@ module RDFS
       name VARCHAR(255),
       last_modified INT,
       updated INT,
-      deleted INT);".freeze
+      deleted INT.
+      deleted_done INT);".freeze
   RDFS_SCHEMA_NODES = "
-    CREATE TABLE nodes (
-      ip VARCHAR(15));".freeze
+    CREATE TABLE nodes (ip VARCHAR(15));".freeze
 
   # RDFS path update frequency (in seconds)
   RDFS_UPDATE_FREQ = 20
