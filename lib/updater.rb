@@ -58,7 +58,7 @@ module RDFS
 
       # Fetch a list of all files
       files = fetch_tree(RDFS_PATH)
-      @logger.add(@loglvl) {"updater: There are currently #{files.size} entries in #{RDFS_PATH}"}
+      @logger.add(Logger::WARN) {"updater: There are currently #{files.size} entries in #{RDFS_PATH}"}
 
       # Iterate through each entry and check to see if it is in the database
       files.each do |f|
@@ -83,7 +83,7 @@ module RDFS
           if last_modified.to_i > row[0][2].to_i
             # File has changed. Rehash it and updated the database.
             file_hash = sha256file(full_filename)
-            sql = "UPDATE files SET sha256 = '#{file_hash}', last_modified= #{last_modified.to_i}, updated = 1, deleted = 0 deleted_done = 0 WHERE name=\"" + f.to_s + '"'
+            sql = "UPDATE files SET sha256 = '#{file_hash}', last_modified= #{last_modified.to_i}, updated = 1, deleted = 0, deleted_done = 0 WHERE name=\"" + f.to_s + '"'
             @logger.add(Logger::DEBUG) {sql}
             RDFS_DB.execute(sql)
           end
