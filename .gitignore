@@ -1,0 +1,7 @@
+.envrc.local
+.envrc.secrets
+.env.local
+.env.secrets
+coverage/
+.envrc
+.idea/

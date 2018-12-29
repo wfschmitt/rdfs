@@ -1,0 +1,10 @@
+layout myruby
+# rvm use call via version in Gemfile !!
+#
+# aktivated via rake
+#
+# rake dotenv
+RAILS_ENV=development
+export VERBOSE=true
+
+

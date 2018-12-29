@@ -63,14 +63,15 @@ module RDFS
   RDFS_DB_FILE = Dir.home + '/.rdfs.sqlite3'
 
   # SQLite3 schema
-  RDFS_SCHEMA_FILES = "
-    CREATE TABLE files (
+  RDFS_SCHEMA_FILES = "CREATE TABLE files (
       sha256 VARCHAR(64),
       name VARCHAR(255),
       last_modified INT,
       updated INT,
-      deleted INT.
+      deleted INT,
       deleted_done INT);".freeze
+  RDFS_SCHEMA_INDEX=
+      "CREATE UNIQUE INDEX `unidx1` ON `files` ( `sha256`, `name` );".freeze
   RDFS_SCHEMA_NODES = "
     CREATE TABLE nodes (ip VARCHAR(15));".freeze
 
@@ -97,11 +98,13 @@ module RDFS
     "Written by Robert W. Oliver II. Licensed under the GPLv3.\n\n"
 
   # If the database doesn't exist, create it.
-  unless File.exist?(RDFS_DB_FILE)
-    db = SQLite3::Database.new RDFS_DB_FILE
-    db.execute RDFS_SCHEMA_FILES
-    db.execute RDFS_SCHEMA_NODES
-    db.close
+  unless File.exist?(RDFS::RDFS_DB_FILE)
+    SQLite3::Database.open( RDFS::RDFS_DB_FILE ) do |d|
+      d.execute RDFS_SCHEMA_FILES
+      d.execute RDFS_SCHEMA_NODES
+      d.execute RDFS_SCHEMA_INDEX
+      d.close
+    end
     logger.info('RDFS database was not found, so it was created.')
   end
 
@@ -116,7 +119,7 @@ module RDFS
 
   # Even in production, it's better for RDFS to crash than to have threads die
   # and never run again. Makes it easier to track down issues.
-  Thread.abort_on_exception = false
+  Thread.abort_on_exception = true
 
   # Start the server
   Thread.new do
