@@ -6,11 +6,7 @@ module RDFS
     def initialize
       # Setup logging inside the server
       @logger = Logger.new(STDOUT)
-      @logger.level == if RDFS_DEBUG
-                         Logger::DEBUG
-                       else
-                         Logger::WARN
-                       end
+      @logger.level = RDFS_DEBUG ? Logger::DEBUG : Logger::WARN
 
       @webrick = WEBrick::HTTPServer.new Port: RDFS_PORT
       @webrick.mount '/nodes', Nodes

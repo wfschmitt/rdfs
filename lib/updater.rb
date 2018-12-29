@@ -12,11 +12,7 @@ module RDFS
 
       # Setup logging inside the updater
       @logger = Logger.new(STDOUT)
-      @logger.level == if RDFS_DEBUG
-                         Logger::DEBUG
-                       else
-                         Logger::WARN
-                       end
+      @logger.level = RDFS_DEBUG ? Logger::DEBUG : Logger::WARN
 
       # Create the main thread
       @main_thread = Thread.new kernel

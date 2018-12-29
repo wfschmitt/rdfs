@@ -9,15 +9,11 @@ module RDFS
 
       # Setup logging inside the updater
       @logger = Logger.new(STDOUT)
-      @logger.level == if RDFS_DEBUG
-                         Logger::DEBUG
-                       else
-                         Logger::WARN
-                       end
+      @logger.level = RDFS_DEBUG ? Logger::DEBUG : Logger::WARN
 
       # Create the thread
       @main_thread = Thread.new kernel
-      @logger.debug('Transmitter thread started.')
+      @logger.info('Transmitter thread started.')
     end
 
     # Stop the transmitter
@@ -60,7 +56,7 @@ module RDFS
       nodes_row = RDFS_DB.execute(sql)
       if nodes_row.count > 0
         sql = 'SELECT * FROM files WHERE updated != 0 OR deleted != 0'
-        @logger.debug('transmitter: ' + sql)
+        @logger.info('transmitter: ' + sql)
         row = RDFS_DB.execute(sql)
         if row.count > 0
           nodes_row.each do |node|
@@ -102,7 +98,7 @@ module RDFS
                     clear_update_flag(filename) if response.body.include?('OK')
                   end
                 rescue StandardError
-                  @logger.debug('transmitter: Unable to connect to node at IP ' + ip + '.')
+                  @logger.warn('transmitter: Unable to connect to node at IP ' + ip + '.')
                 end
               end
               next unless deleted != 0
@@ -114,7 +110,7 @@ module RDFS
                                                'filename' => filename)
                 clear_update_flag(filename) if response.body.include?('OK')
               rescue StandardError
-                @logger.debug('transmitter: Unable to connect to node at IP ' + ip + '.')
+                @logger.warn('transmitter: Unable to connect to node at IP ' + ip + '.')
               end
             end
           end
