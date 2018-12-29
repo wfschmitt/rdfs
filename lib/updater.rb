@@ -92,7 +92,7 @@ module RDFS
 
     def check_for_deleted_files
       # Check for deleted files
-      sql = 'SELECT name FROM files WHERE updated = 0 AND deleted = 0'
+      sql = 'SELECT name FROM files WHERE updated = 0 AND deleted = 0 AND deleted_done = 0'
       @logger.warn {sql}
       all_files = RDFS_DB.execute(sql)
       if all_files.count > 0
