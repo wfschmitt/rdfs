@@ -74,7 +74,7 @@ module RDFS
       ip VARCHAR(15));".freeze
 
   # RDFS path update frequency (in seconds)
-  RDFS_UPDATE_FREQ = 10
+  RDFS_UPDATE_FREQ = 20
 
   # RDFS transmit frequency (in seconds)
   RDFS_TRANSMIT_FREQ = 5
