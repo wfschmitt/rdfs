@@ -6,14 +6,15 @@ module RDFS
     def initialize(transmit_frequency)
       @transmit_frequency = transmit_frequency
       @running = 1
-
       # Setup logging inside the updater
       @logger = Logger.new(STDOUT)
       @logger.level = RDFS_DEBUG ? Logger::DEBUG : Logger::WARN
-
+      @logger.progname = 'transmitter'.yellow
+      @loglvl = Logger::WARN
+      @logger.warn {'Transmitter thread started.'.yellow}
       # Create the thread
       @main_thread = Thread.new kernel
-      @logger.info('Transmitter thread started.')
+
     end
 
     # Stop the transmitter
@@ -56,8 +57,9 @@ module RDFS
       nodes_row = RDFS_DB.execute(sql)
       if nodes_row.count > 0
         sql = 'SELECT * FROM files WHERE updated != 0 OR deleted != 0'
-        @logger.info('transmitter: ' + sql)
+        @logger.add(@loglvl) {sql}
         row = RDFS_DB.execute(sql)
+        @logger.add(@loglvl) {"nothing todo #{row.count} "}
         if row.count > 0
           nodes_row.each do |node|
             row.each do |file|
@@ -98,7 +100,7 @@ module RDFS
                     clear_update_flag(filename) if response.body.include?('OK')
                   end
                 rescue StandardError
-                  @logger.warn('transmitter: Unable to connect to node at IP ' + ip + '.')
+                  @logger.warn {'Unable to connect to node at IP ' + ip + '.'}
                 end
               end
               next unless deleted != 0
@@ -110,7 +112,7 @@ module RDFS
                                                'filename' => filename)
                 clear_update_flag(filename) if response.body.include?('OK')
               rescue StandardError
-                @logger.warn('transmitter: Unable to connect to node at IP ' + ip + '.')
+                @logger.warn {'Unable to connect to node at IP ' + ip + '.'}
               end
             end
           end
@@ -127,7 +129,7 @@ module RDFS
     # Clears the updated/deleted flags
     def clear_update_flag(filename)
       sql = 'UPDATE files SET updated = 0, deleted = 0 WHERE name ="' + filename.to_s + '"'
-      @logger.debug('transmitter: ' + sql)
+      @logger.add(@loglvl) {sql}
       RDFS_DB.execute(sql)
     end
   end

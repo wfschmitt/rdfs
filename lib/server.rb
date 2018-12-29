@@ -5,8 +5,11 @@ module RDFS
 
     def initialize
       # Setup logging inside the server
-      @logger = Logger.new(STDOUT)
+      @logger = ::Logger.new(STDOUT)
       @logger.level = RDFS_DEBUG ? Logger::DEBUG : Logger::WARN
+      @logger.progname = 'server'.blue
+      @loglvl = Logger::WARN
+      @logger.warn {'Server started.'.blue}
 
       @webrick = WEBrick::HTTPServer.new Port: RDFS_PORT
       @webrick.mount '/nodes', Nodes
@@ -29,12 +32,14 @@ module RDFS
     private
 
     def api_handler(request)
+
+      #   @logger.add(@loglvl){'dont copy on my self'}
       # We assume this by default, but can change it as the function progresses
       response_text = 'OK'
 
       # Grab the IP of the requester
       ip = request.remote_ip
-
+      warn("query: #{request.query['api_call']}")
       case request.query['api_call']
       when 'add'
         filename = request.query['filename']
@@ -84,7 +89,7 @@ module RDFS
           new_name= RDFS_PATH + '/' +new_name
           testxx = (new_name <=> old_name)
           if testxx.zero?
-            @logger.warn('dont copy on my self')
+            @logger.warn {'dont copy on my self'}
           else
             FileUtils.cp(old_name, new_name)
           end
@@ -109,7 +114,8 @@ module RDFS
             FileUtils.rm_f(full_filename)
           end
         else
-          response_text = 'NOT_FOUND'
+          warn('delete not found')
+          # response_text = 'NOT_FOUND'
         end
 
       when 'add_query'

@@ -40,6 +40,7 @@ require 'uri'
 require 'net/http'
 require 'zlib'
 require 'base64'
+require 'awesome_print'
 
 require_relative 'lib/updater'
 require_relative 'lib/transmitter'
@@ -53,7 +54,7 @@ module RDFS
   end
 
   # If debug is enabled, output will be quite verbose.
-  RDFS_DEBUG = 1
+  RDFS_DEBUG = false
 
   # Default RDFS path
   RDFS_PATH = Dir.home + '/rdfs'
@@ -77,18 +78,18 @@ module RDFS
   RDFS_UPDATE_FREQ = 20
 
   # RDFS transmit frequency (in seconds)
-  RDFS_TRANSMIT_FREQ = 5
+  RDFS_TRANSMIT_FREQ = 10
 
   # RDFS listen port
   RDFS_PORT = 47_656
 
   # Setup logging
   logger = Logger.new(STDOUT)
-  logger.level == if RDFS_DEBUG
+  logger.level = if RDFS_DEBUG
                     Logger::DEBUG
-                  else
+                 else
                     Logger::WARN
-                  end
+                 end
 
   # Output startup message
   puts "RDFS - Ruby Distributed File Sync\n"\
@@ -121,13 +122,13 @@ module RDFS
   Thread.new do
     @server = Server.new
   end
-  sleep 6
+  sleep 1
 
   # Start the updater
   Thread.new do
     @updater = Updater.new(RDFS_UPDATE_FREQ)
   end
-  sleep 6
+  sleep 1
 
   # Start the transmitter
   @transmitter = Transmitter.new(RDFS_TRANSMIT_FREQ)

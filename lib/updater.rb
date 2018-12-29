@@ -11,8 +11,11 @@ module RDFS
       @running = 1
 
       # Setup logging inside the updater
+      @loglvl = Logger::DEBUG #  Logger::WARN default for local log.add
       @logger = Logger.new(STDOUT)
       @logger.level = RDFS_DEBUG ? Logger::DEBUG : Logger::WARN
+      @logger.progname = 'updater'.green
+      @loglvl = Logger::DEBUG
 
       # Create the main thread
       @main_thread = Thread.new kernel
@@ -55,7 +58,7 @@ module RDFS
 
       # Fetch a list of all files
       files = fetch_tree(RDFS_PATH)
-      @logger.debug('updater: There are currently ' + files.size.to_s + ' entries in ' + RDFS_PATH)
+      @logger.add(@loglvl) {"updater: There are currently #{files.size} entries in #{RDFS_PATH}"}
 
       # Iterate through each entry and check to see if it is in the database
       files.each do |f|
@@ -65,14 +68,14 @@ module RDFS
         updated = nil
 
         # If it's not in the database, hash it and add it to the DB
-        test = 'SELECT * FROM files WHERE name="' + f.to_s + '"'
-        puts test
-        row = RDFS_DB.execute(test)
+        sql = "SELECT * FROM files WHERE name= \"#{f}\""
+        @logger.add(Logger::DEBUG) {sql}
+        row = RDFS_DB.execute(sql)
         if row.count == 0
           # It wasn't in the database, so add it
           file_hash = sha256file(full_filename)
           sql = "INSERT INTO files (sha256, name, last_modified, updated, deleted) VALUES ('#{file_hash}',\"" + f.to_s + "\", #{last_modified.to_i}, 1, 0)"
-          @logger.debug('updater: ' + sql)
+          @logger.add(Logger::DEBUG) {sql}
           RDFS_DB.execute(sql)
         else
           # It was in the database, so see if it has changed.
@@ -80,7 +83,7 @@ module RDFS
             # File has changed. Rehash it and updated the database.
             file_hash = sha256file(full_filename)
             sql = "UPDATE files SET sha256 = '#{file_hash}', last_modified= #{last_modified.to_i}, updated = 1, deleted = 0 WHERE name=\"" + f.to_s + '"'
-            puts sql
+            @logger.add(Logger::DEBUG) {sql}
             RDFS_DB.execute(sql)
           end
         end
@@ -90,7 +93,7 @@ module RDFS
     def check_for_deleted_files
       # Check for deleted files
       sql = 'SELECT name FROM files WHERE updated = 0 AND deleted = 0'
-      @logger.debug('updater: ' + sql)
+      @logger.warn {sql}
       all_files = RDFS_DB.execute(sql)
       if all_files.count > 0
         all_files.each do |f|
@@ -100,7 +103,7 @@ module RDFS
 
           # File doesn't exist, so mark it deleted
           sql = 'UPDATE files SET deleted = 1 WHERE name="' + filename.to_s + '"'
-          @logger.debug('updater: ' + sql)
+          @logger.debug {sql}
           RDFS_DB.execute(sql)
         end
       end
