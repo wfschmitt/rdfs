@@ -114,9 +114,10 @@ module RDFS
             # Force deletion of a file.
             FileUtils.rm_f(full_filename)
           end
+          response_text = 'OK'
         else
           warn('delete not found: ' + filename)
-          response_text = 'NOT_FOUND'
+          response_text = 'OK'
         end
 
       when 'add_query'

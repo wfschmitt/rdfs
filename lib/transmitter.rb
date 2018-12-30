@@ -113,9 +113,10 @@ module RDFS
                                                'sha256sum' => sha256sum)
                 if response.body.include?('OK')
                   clear_update_flag(filename)
+                  set_deleted_flag(filename)
                 else
                   # todo:
-                  @logger.warn {'delete failed remote ' + response.body}
+                  @logger.warn {'delete failed remote ' + request.body}
                 end
               rescue StandardError
                 @logger.warn {'Unable to connect to node at IP ' + ip + '.'}
@@ -135,6 +136,14 @@ module RDFS
     # Clears the updated/deleted flags
     def clear_update_flag(filename)
       sql = 'UPDATE files SET updated = 0, deleted = 0, deleted_done = 0 WHERE name ="' + filename.to_s + '"'
+      @logger.add(@loglvl) {sql}
+      RDFS_DB.execute(sql)
+    end
+
+
+    # Clears the updated/deleted flags
+    def set_deleted_flag(filename)
+      sql = 'UPDATE files SET updated = 0, deleted = 0, deleted_done = 1 WHERE name ="' + filename.to_s + '"'
       @logger.add(@loglvl) {sql}
       RDFS_DB.execute(sql)
     end
