@@ -81,7 +81,7 @@ module RDFS
           RDFS_DB.execute(sql)
         else
           # It was in the database, so see if it has changed.
-          if last_modified.to_i > row[0][2].to_i
+          if last_modified.to_i > row[0][2].to_i || row[0][5] == 1
             # File has changed. Rehash it and updated the database.
             file_hash = sha256file(full_filename)
             sql = "UPDATE files SET sha256 = '#{file_hash}', last_modified= #{last_modified.to_i}, updated = 1, deleted = 0, deleted_done = 0 WHERE name=\"" + f.to_s + '"'
