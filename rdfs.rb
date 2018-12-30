@@ -54,7 +54,7 @@ module RDFS
   end
 
   # If debug is enabled, output will be quite verbose.
-  RDFS_DEBUG = false
+  RDFS_DEBUG = true
 
   # Default RDFS path
   RDFS_PATH = Dir.home + '/rdfs'
@@ -76,7 +76,7 @@ module RDFS
     CREATE TABLE nodes (ip VARCHAR(15));".freeze
 
   # RDFS path update frequency (in seconds)
-  RDFS_UPDATE_FREQ = 20
+  RDFS_UPDATE_FREQ = 5
 
   # RDFS transmit frequency (in seconds)
   RDFS_TRANSMIT_FREQ = 10
