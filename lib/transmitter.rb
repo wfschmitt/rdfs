@@ -56,7 +56,7 @@ module RDFS
       sql = 'SELECT * FROM nodes'
       nodes_row = RDFS_DB.execute(sql)
       if nodes_row.count > 0
-        sql = 'SELECT * FROM files WHERE updated != 0 OR deleted != 0'
+        sql = 'SELECT * FROM files WHERE deleted_done = 0 AND (updated != 0 OR deleted != 0) '
         @logger.add(@loglvl) {sql}
         row = RDFS_DB.execute(sql)
         @logger.add(@loglvl) {"todo: #{row.count} "}
