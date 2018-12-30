@@ -33,7 +33,7 @@ module RDFS
 
     def api_handler(request)
 
-      #   @logger.add(@loglvl){'dont copy on my self'}
+      # @logger.add(@loglvl){'dont copy on my self'}
       # We assume this by default, but can change it as the function progresses
       response_text = 'OK'
 

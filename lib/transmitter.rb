@@ -74,8 +74,7 @@ module RDFS
               if (updated != 0) && (deleted == 0)
                 # UPDATE
                 begin
-                  response = Net::HTTP.post_form(uri, 'api_call' => 'add_query',
-                                                 'filename' => filename, 'sha256sum' => sha256sum)
+                  response = Net::HTTP.post_form(uri, 'api_call' => 'add_query', 'filename' => filename, 'sha256sum' => sha256sum)
                   if response.body.include?('EXISTS')
                   # File exists but with a different filename, so call the add_dup
                   # function to avoid using needless bandwidth
@@ -141,7 +140,7 @@ module RDFS
 
     # Clears the updated/deleted flags
     def clear_update_flag(filename)
-      sql = 'UPDATE files SET updated = 0, deleted = 0, deleted_done = 0 WHERE name ="' + filename.to_s + '"'
+      sql = 'UPDATE files SET updated = 0, deleted = 0 WHERE name ="' + filename.to_s + '"'
       @logger.add(@loglvl) {sql}
       RDFS_DB.execute(sql)
     end
@@ -150,6 +149,13 @@ module RDFS
     # Clears the updated/deleted flags
     def set_deleted_flag(filename)
       sql = 'UPDATE files SET updated = 0, deleted = 0, deleted_done = 1 WHERE name ="' + filename.to_s + '"'
+      @logger.add(@loglvl) {sql}
+      RDFS_DB.execute(sql)
+    end
+
+    # Clears the updated/deleted flags
+    def clr_deleted_done_flag(filename)
+      sql = 'UPDATE files SET deleted = 0, deleted_done = 0 WHERE name ="' + filename.to_s + '"'
       @logger.add(@loglvl) {sql}
       RDFS_DB.execute(sql)
     end

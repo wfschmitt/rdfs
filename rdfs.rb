@@ -39,6 +39,7 @@ require 'webrick'
 require 'uri'
 require 'net/http'
 require 'zlib'
+require 'English'
 require 'base64'
 require 'awesome_print'
 
@@ -60,7 +61,9 @@ module RDFS
   RDFS_PATH = Dir.home + '/rdfs'
 
   # SQLite3 database file
-  RDFS_DB_FILE = Dir.home + '/.rdfs.sqlite3'
+  RDFS_DB_DIR = Dir.home + "/rdfsdb/"
+
+  RDFS_DB_FILE = RDFS_DB_DIR + `hostname`.chop + "#{ENV['HOSTNAME']}.sqlite3"
 
   # SQLite3 schema
   RDFS_SCHEMA_FILES = "CREATE TABLE files (
@@ -93,13 +96,17 @@ module RDFS
     "Copyright (C) 2018 Sourcerer, All Rights Reserved.\n"\
     "Written by Robert W. Oliver II. Licensed under the GPLv3.\n\n"
 
+  unless Dir.exist?(RDFS_DB_DIR)
+    Dir.mkdir(RDFS_DB_DIR)
+    logger.info('RDFS directory ' + RDFS_DB_DIR + ' not found, so it was created.')
+  end
   # If the database doesn't exist, create it.
   unless File.exist?(RDFS::RDFS_DB_FILE)
     SQLite3::Database.open( RDFS::RDFS_DB_FILE ) do |d|
       d.execute RDFS_SCHEMA_FILES
       d.execute RDFS_SCHEMA_NODES
       d.execute RDFS_SCHEMA_INDEX
-      d.close
+      d10053.close
     end
     logger.info('RDFS database was not found, so it was created.')
   end
