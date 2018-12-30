@@ -39,7 +39,7 @@ module RDFS
 
       # Grab the IP of the requester
       ip = request.remote_ip
-      warn("query: #{request.query['api_call']}")
+      warn("query: #{request.query['api_call']} \n-- #{request.query}")
       case request.query['api_call']
       when 'add'
         filename = request.query['filename']
@@ -81,7 +81,7 @@ module RDFS
         sha256sum = request.query['sha256sum']
 
         # Grab the original filename
-        query = RDFS_DB.prepare('SELECT name FROM files WHERE sha256 = :sha256')
+        query = RDFS_DB.prepare('SELECT name FROM files WHERE deleted_done = 0 AND sha256 = :sha256')
         query.bind_param('sha256', sha256sum)
         row = query.execute.first
         if row.count > 0
@@ -93,11 +93,11 @@ module RDFS
           else
             FileUtils.cp(old_name, new_name) if File.exist?(old_name) && !File.exist?(new_name)
           end
-          response_text = 'OK'
+          response_text = 'OK:' + sha256sum + ';' + new_name
         else
           # SHA256 not found
           # File deleted after query but before add_dup?
-          response_text = 'NOT_FOUND'
+          response_text = 'NOT_FOUND:' + sha256sum + ';' + new_name
         end
 
       when 'delete'
@@ -106,6 +106,7 @@ module RDFS
         full_filename = RDFS_PATH + '/' + filename
         # Does the file exist?
         if File.exist?(full_filename)
+          warn('file to delete found: ' + filename)
           # Is it a directory? If so, handle it separately.
           if File.directory?(full_filename)
             FileUtils.rmdir(full_filename)
@@ -114,14 +115,14 @@ module RDFS
             FileUtils.rm_f(full_filename)
           end
         else
-          warn('delete not found')
-          # response_text = 'NOT_FOUND'
+          warn('delete not found: ' + filename)
+          response_text = 'NOT_FOUND'
         end
 
       when 'add_query'
         # Check if duplicate exists
         sha256sum = request.query['sha256sum']
-        query = RDFS_DB.prepare('SELECT sha256 FROM files WHERE sha256 = :sha256')
+        query = RDFS_DB.prepare('SELECT sha256 FROM files WHERE deleted_done = 0 AND sha256 = :sha256')
         query.bind_param('sha256', sha256sum)
         row = query.execute
         response_text = (row.count > 0) ? 'EXISTS' : 'NOT_FOUND'

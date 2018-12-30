@@ -74,10 +74,8 @@ module RDFS
               if (updated != 0) && (deleted == 0)
                 # UPDATE
                 begin
-                  response = Net::HTTP.post_form(uri,
-                                                 'api_call' => 'add_query',
-                                                 'filename' => filename,
-                                                 'sha256sum' => sha256sum)
+                  response = Net::HTTP.post_form(uri, 'api_call' => 'add_query',
+                                                 'filename' => filename, 'sha256sum' => sha256sum)
                   if response.body.include?('EXISTS')
                     # File exists but with a different filename, so call the add_dup
                     # function to avoid using needless bandwidth
@@ -85,32 +83,40 @@ module RDFS
                                                    'api_call' => 'add_dup',
                                                    'filename' => filename,
                                                    'sha256sum' => sha256sum)
-                    clear_update_flag(filename) if response.body.include?('OK')
-                  else
-                    # File doesn't exist on node, so let's push it.
-                    # Read it into a string (this will have to be improved at some point)
-                    file_contents = read_file(RDFS_PATH + '/' + filename)
-                    file_contents = Base64.encode64(file_contents)
-                    # Then push it in a POST call
-                    response = Net::HTTP.post_form(uri,
+                    if response.body.include?('OK')
+                      clear_update_flag(filename)
+                      return
+                    end
+                  end
+                  # File doesn't exist on node, so let's push it.
+                  # Read it into a string (this will have to be improved at some point)
+                  file_contents = read_file(RDFS_PATH + '/' + filename)
+                  file_contents = Base64.encode64(file_contents)
+                  # Then push it in a POST call
+                  response = Net::HTTP.post_form(uri,
                                                    'api_call' => 'add',
                                                    'filename' => filename,
                                                    'sha256sum' => sha256sum,
                                                    'content' => file_contents)
-                    clear_update_flag(filename) if response.body.include?('OK')
-                  end
+                  clear_update_flag(filename) if response.body.include?('OK')
                 rescue StandardError
                   @logger.warn {'Unable to connect to node at IP ' + ip + '.'}
                 end
               end
-              next unless deleted != 0
+              next if deleted == 0
 
               # DELETED
               begin
                 response = Net::HTTP.post_form(uri,
                                                'api_call' => 'delete',
-                                               'filename' => filename)
-                clear_update_flag(filename) if response.body.include?('OK')
+                                               'filename' => filename,
+                                               'sha256sum' => sha256sum)
+                if response.body.include?('OK')
+                  clear_update_flag(filename)
+                else
+                  # todo:
+                  @logger.warn {'delete failed remote ' + response.body}
+                end
               rescue StandardError
                 @logger.warn {'Unable to connect to node at IP ' + ip + '.'}
               end
