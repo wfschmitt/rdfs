@@ -35,6 +35,7 @@ module RDFS
     def kernel
       while @running
         update_database
+        check_for_deleted_files
         Thread.pass
         sleep @update_frequency
       end
@@ -54,7 +55,7 @@ module RDFS
 
     # Update database with files
     def update_database
-      check_for_deleted_files
+
 
       # Fetch a list of all files
       files = fetch_tree(RDFS_PATH)
