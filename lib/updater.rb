@@ -104,7 +104,7 @@ module RDFS
           next if File.exist?(full_filename)
 
           # File doesn't exist, so mark it deleted
-          sql = 'UPDATE files SET deleted = 1, deleted_done = 0 WHERE name="' + filename.to_s + '"'
+          sql = 'UPDATE files SET deleted = 1, deleted_done = 1 WHERE name="' + filename.to_s + '"'
           @logger.debug {sql}
           RDFS_DB.execute(sql)
         end

@@ -117,7 +117,6 @@ module RDFS
                                                'filename' => filename,
                                                'sha256sum' => sha256sum)
                 if response.body.include?('OK')
-                  clear_update_flag(filename)
                   set_deleted_flag(filename)
                 else
                   # todo:

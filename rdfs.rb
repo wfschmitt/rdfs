@@ -106,7 +106,7 @@ module RDFS
       d.execute RDFS_SCHEMA_FILES
       d.execute RDFS_SCHEMA_NODES
       d.execute RDFS_SCHEMA_INDEX
-      d10053.close
+      d.close
     end
     logger.info('RDFS database was not found, so it was created.')
   end
