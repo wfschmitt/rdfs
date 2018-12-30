@@ -54,7 +54,7 @@ module RDFS
   end
 
   # If debug is enabled, output will be quite verbose.
-  RDFS_DEBUG = true
+  RDFS_DEBUG = false
 
   # Default RDFS path
   RDFS_PATH = Dir.home + '/rdfs'
