@@ -117,7 +117,7 @@ module RDFS
                                                'filename' => filename,
                                                'sha256sum' => sha256sum)
                 if response.body.include?('OK')
-                  set_deleted_flag(filename)
+                  set_deleted_done_flag(filename)
                 else
                   # todo:
                   @logger.warn {'delete failed remote ' + request.body}
@@ -146,7 +146,7 @@ module RDFS
 
 
     # Clears the updated/deleted flags
-    def set_deleted_flag(filename)
+    def set_deleted_done_flag(filename)
       sql = 'UPDATE files SET updated = 0, deleted = 0, deleted_done = 1 WHERE name ="' + filename.to_s + '"'
       @logger.add(@loglvl) {sql}
       RDFS_DB.execute(sql)
