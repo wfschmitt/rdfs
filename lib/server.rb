@@ -55,7 +55,7 @@ module RDFS
         if row.count > 0
           # this already exists signal sucess
           @logger.warn('add already exits')
-          # return [200, 'text/plain', response_text]
+          return [200, 'text/plain', response_text]
         else
 
           if filename.include?('/')
@@ -94,7 +94,7 @@ module RDFS
         row = query.execute
         if row.count > 0
           old_name = RDFS_PATH + '/' + row[0]
-          new_name= RDFS_PATH + '/' +new_name
+          new_name = RDFS_PATH + '/' + new_name
           testxx = (new_name <=> old_name)
           if testxx.zero?
             warn ('dont copy on my self')

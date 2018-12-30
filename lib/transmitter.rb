@@ -74,9 +74,9 @@ module RDFS
               if (updated != 0) && (deleted == 0)
                 # UPDATE
                 begin
-                  #response = Net::HTTP.post_form(uri, 'api_call' => 'add_query',
-                  #                               'filename' => filename, 'sha256sum' => sha256sum)
-                  #if response.body.include?('EXISTS')
+                  response = Net::HTTP.post_form(uri, 'api_call' => 'add_query',
+                                                 'filename' => filename, 'sha256sum' => sha256sum)
+                  if response.body.include?('EXISTS')
                   # File exists but with a different filename, so call the add_dup
                   # function to avoid using needless bandwidth
                     response = Net::HTTP.post_form(uri,
@@ -87,7 +87,11 @@ module RDFS
                       clear_update_flag(filename)
                       next
                     end
-                    #end
+                  end
+                rescue StandardError
+                  @logger.warn {'Unable to connect to node at IP ' + ip + '.'}
+                end
+                begin
                     # File doesn't exist on node, so let's push it.
                     # Read it into a string (this will have to be improved at some point)
                   file_contents = read_file(RDFS_PATH + '/' + filename)
@@ -100,7 +104,7 @@ module RDFS
                                                    'content' => file_contents)
                   clear_update_flag(filename) if response.body.include?('OK')
                 rescue StandardError
-                  @logger.warn {'Unable to connect to node at IP ' + ip + '.'}
+                  @logger.warn {'Unable to transfer to node at IP ' + ip + '.'}
                 end
               end
               next if deleted == 0
