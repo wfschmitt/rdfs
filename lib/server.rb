@@ -67,7 +67,7 @@ module RDFS
 
           # Add it to the local database with updated and deleted set to 0 so that
           # the client's transmitter won't try to send it to possibly non-existent nodes.
-          query = RDFS_DB.prepare('DELETE FROM files WHERE name = :name, sha256 = :sha256')
+          query = RDFS_DB.prepare('DELETE FROM files WHERE name = :name AND sha256 = :sha256')
           query.bind_param('name', filename)
           query.bind_param('sha256', sha256sum)
           query.execute
