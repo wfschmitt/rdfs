@@ -79,6 +79,7 @@ module RDFS
                   if response.body.include?('EXISTS')
                   # File exists but with a different filename, so call the add_dup
                   # function to avoid using needless bandwidth
+                    @logger.add(@loglvl) {'add double'}
                     response = Net::HTTP.post_form(uri,
                                                    'api_call' => 'add_dup',
                                                    'filename' => filename,
@@ -105,6 +106,7 @@ module RDFS
                   clear_update_flag(filename) if response.body.include?('OK')
                 rescue StandardError
                   @logger.warn {'Unable to transfer to node at IP ' + ip + '.'}
+                  clear_update_flag(filename) unless File.exist?(RDFS_PATH + '/' + filename)
                 end
               end
               next if deleted == 0

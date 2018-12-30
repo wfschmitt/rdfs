@@ -26,7 +26,7 @@ module RDFS
       status, content_type, body = api_handler(request)
       response.status = status
       response['Content-Type'] = content_type
-      response.body = body
+      response.body = body || "empty"
     end
 
     private
@@ -93,6 +93,7 @@ module RDFS
         query.bind_param('sha256', sha256sum)
         row = query.execute
         if row.count > 0
+          ap row
           old_name = RDFS_PATH + '/' + row[0]
           new_name = RDFS_PATH + '/' + new_name
           testxx = (new_name <=> old_name)
