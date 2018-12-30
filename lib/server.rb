@@ -91,7 +91,7 @@ module RDFS
         # Grab the original filename
         query = RDFS_DB.prepare('SELECT name FROM files WHERE deleted_done = 0 AND sha256 = :sha256')
         query.bind_param('sha256', sha256sum)
-        row = query.execute.first
+        row = query.execute
         if row.count > 0
           old_name = RDFS_PATH + '/' + row[0]
           new_name= RDFS_PATH + '/' +new_name

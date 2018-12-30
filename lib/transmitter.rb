@@ -74,25 +74,25 @@ module RDFS
               if (updated != 0) && (deleted == 0)
                 # UPDATE
                 begin
-                  response = Net::HTTP.post_form(uri, 'api_call' => 'add_query',
-                                                 'filename' => filename, 'sha256sum' => sha256sum)
-                  if response.body.include?('EXISTS')
-                    # File exists but with a different filename, so call the add_dup
-                    # function to avoid using needless bandwidth
+                  #response = Net::HTTP.post_form(uri, 'api_call' => 'add_query',
+                  #                               'filename' => filename, 'sha256sum' => sha256sum)
+                  #if response.body.include?('EXISTS')
+                  # File exists but with a different filename, so call the add_dup
+                  # function to avoid using needless bandwidth
                     response = Net::HTTP.post_form(uri,
                                                    'api_call' => 'add_dup',
                                                    'filename' => filename,
                                                    'sha256sum' => sha256sum)
                     if response.body.include?('OK')
                       clear_update_flag(filename)
-                      return
+                      next
                     end
-                  end
-                  # File doesn't exist on node, so let's push it.
-                  # Read it into a string (this will have to be improved at some point)
+                    #end
+                    # File doesn't exist on node, so let's push it.
+                    # Read it into a string (this will have to be improved at some point)
                   file_contents = read_file(RDFS_PATH + '/' + filename)
                   file_contents = Base64.encode64(file_contents)
-                  # Then push it in a POST call
+                    # Then push it in a POST call
                   response = Net::HTTP.post_form(uri,
                                                    'api_call' => 'add',
                                                    'filename' => filename,

@@ -86,11 +86,7 @@ module RDFS
 
   # Setup logging
   logger = Logger.new(STDOUT)
-  logger.level = if RDFS_DEBUG
-                    Logger::DEBUG
-                 else
-                    Logger::WARN
-                 end
+  logger.level = RDFS_DEBUG ? Logger::DEBUG : Logger::WARN
 
   # Output startup message
   puts "RDFS - Ruby Distributed File Sync\n"\
