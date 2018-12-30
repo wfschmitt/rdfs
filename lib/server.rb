@@ -39,7 +39,7 @@ module RDFS
 
       # Grab the IP of the requester
       ip = request.remote_ip
-      warn("query: #{request.query['api_call']} \n-- #{request.query}")
+      warn("query: #{request.query['api_call']} ") #"\n-- #{request.query}")
       case request.query['api_call']
       when 'add'
         filename = request.query['filename']
