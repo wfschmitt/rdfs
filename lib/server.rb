@@ -72,7 +72,7 @@ module RDFS
           query.bind_param('sha256', sha256sum)
           query.execute
 
-          response_text = "file with #{sha256} #{name}  removed.\n"
+          response_text = "file with #{sha256sum} #{filename}  removed.\n"
           warn(response_text)
           query = RDFS_DB.prepare('INSERT INTO files (name, sha256, last_modified, updated, deleted, deleted_done) VALUES (:name, :sha256, :last_modified, :updated, :deleted, :deleted_done)')
           query.bind_param('name', filename)
