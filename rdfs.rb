@@ -75,11 +75,9 @@ module RDFS
       updated INT,
       deleted INT,
       deleted_done INT);".freeze
-  RDFS_SCHEMA_INDEX =
-      "CREATE UNIQUE INDEX `unidx1` ON `files` ( `sha256`, `name` );" +
-          "CREATE UNIQUE INDEX `unidxnames` ON `files` ( `name` );".freeze
-  RDFS_SCHEMA_NODES = "
-    CREATE TABLE nodes (ip VARCHAR(15));".freeze
+  RDFS_SCHEMA_INDEX = "CREATE UNIQUE INDEX `unidx1` ON `files` ( `sha256`, `name` );" +
+      "CREATE UNIQUE INDEX `unidxnames` ON `files` ( `name` );"
+  RDFS_SCHEMA_NODES = "CREATE TABLE nodes (ip VARCHAR(15));"
 
   # RDFS path update frequency (in seconds)
   RDFS_UPDATE_FREQ = 5
