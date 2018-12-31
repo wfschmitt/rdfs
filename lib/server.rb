@@ -87,7 +87,7 @@ module RDFS
       end
 
       when 'add_dup'
-        new_name = request.query['filename']
+        new_name = request.query['name']
         sha256sum = request.query['sha256']
 
         # Grab the original filename
@@ -113,7 +113,7 @@ module RDFS
 
       when 'delete'
         # Delete file was called
-        filename = request.query['filename']
+        filename = request.query['name']
         full_filename = RDFS_PATH + '/' + filename
         # Does the file exist?
         if File.exist?(full_filename)
@@ -133,7 +133,7 @@ module RDFS
 
       when 'add_query'
         # Check if duplicate exists
-        sha256sum = request.query['sha256sum']
+        sha256sum = request.query['sha256']
         query = RDFS_DB.prepare('SELECT sha256 FROM files WHERE deleted_done = 0 AND sha256 = :sha256')
         query.bind_param('sha256', sha256sum)
         row = query.execute

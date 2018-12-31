@@ -17,7 +17,7 @@ module RDFS
     #private
 
     #attr_writer :running
-    #attr_accessor :logger
+    attr_accessor :logger
 
     # def kernel
     #   while @running
