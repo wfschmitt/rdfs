@@ -44,7 +44,7 @@ module RDFS
       warn("query: #{request.query['api_call']} ") #"\n-- #{request.query}")
       case request.query['api_call']
       when 'add'
-        filename = request.query['filename']
+        filename = request.query['name']
         final_filename = RDFS_PATH + '/' + filename
         # Does the path exist? If not, create it.
         sha256sum = request.query['sha256']

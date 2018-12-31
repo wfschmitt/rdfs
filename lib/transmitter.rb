@@ -66,12 +66,12 @@ module RDFS
               if (updated != 0) && (deleted == 0)
                 # UPDATE
                 begin
-                  response = Net::HTTP.post_form(uri, 'api_call' => 'add_query', 'filename' => filename, 'sha256' => sha256sum)
+                  response = Net::HTTP.post_form(uri, 'api_call' => 'add_query', 'name' => filename, 'sha256' => sha256sum)
                   if response.body.include?('EXISTS')
                   # File exists but with a different filename, so call the add_dup
                   # function to avoid using needless bandwidth
                     @logger.add(@loglvl) {'add double'}
-                    response = Net::HTTP.post_form(uri, 'api_call' => 'add_dup', 'filename' => filename, 'sha256' => sha256sum)
+                    response = Net::HTTP.post_form(uri, 'api_call' => 'add_dup', 'name' => filename, 'sha256' => sha256sum)
                     if response.body.include?('OK')
                       clear_update_flag(filename)
                       next
@@ -86,7 +86,7 @@ module RDFS
                   file_contents = read_file(RDFS_PATH + '/' + filename)
                   file_contents = Base64.encode64(file_contents)
                     # Then push it in a POST call
-                  response = Net::HTTP.post_form(uri, 'api_call' => 'add', 'filename' => filename,
+                  response = Net::HTTP.post_form(uri, 'api_call' => 'add', 'name' => filename,
                                                  'sha256' => sha256sum,
                                                  'content' => file_contents)
                   clear_update_flag(filename) if response.body.include?('OK')
@@ -101,7 +101,7 @@ module RDFS
               begin
                 response = Net::HTTP.post_form(uri,
                                                'api_call' => 'delete',
-                                               'filename' => filename,
+                                               'name' => filename,
                                                'sha256' => sha256sum)
                 if response.body.include?('OK')
                   set_deleted_done_flag(filename)
