@@ -63,7 +63,9 @@ module RDFS
   # SQLite3 database file
   RDFS_DB_DIR = Dir.home + "/rdfsdb/"
 
-  RDFS_DB_FILE = RDFS_DB_DIR + `hostname`.chop + "#{ENV['HOSTNAME']}.sqlite3"
+  HOSTNAME = `hostname`.chomp
+
+  RDFS_DB_FILE = RDFS_DB_DIR + HOSTNAME + ".sqlite3"
 
   # SQLite3 schema
   RDFS_SCHEMA_FILES = "CREATE TABLE files (
@@ -73,16 +75,16 @@ module RDFS
       updated INT,
       deleted INT,
       deleted_done INT);".freeze
-  RDFS_SCHEMA_INDEX=
-      "CREATE UNIQUE INDEX `unidx1` ON `files` ( `sha256`, `name` );".freeze
+  RDFS_SCHEMA_INDEX =
+      "CREATE UNIQUE INDEX `unidx1` ON `files` ( `sha256`, `name` );" +
+          "CREATE UNIQUE INDEX `unidxnames` ON `files` ( `name` );".freeze
   RDFS_SCHEMA_NODES = "
     CREATE TABLE nodes (ip VARCHAR(15));".freeze
 
   # RDFS path update frequency (in seconds)
   RDFS_UPDATE_FREQ = 5
 
-  # RDFS transmit frequency (in seconds)
-  RDFS_TRANSMIT_FREQ = 10
+  # RDFS transmit freq 5
 
   # RDFS listen port
   RDFS_PORT = 47_656
@@ -102,7 +104,7 @@ module RDFS
   end
   # If the database doesn't exist, create it.
   unless File.exist?(RDFS::RDFS_DB_FILE)
-    SQLite3::Database.open( RDFS::RDFS_DB_FILE ) do |d|
+    SQLite3::Database.open(RDFS::RDFS_DB_FILE) do |d|
       d.execute RDFS_SCHEMA_FILES
       d.execute RDFS_SCHEMA_NODES
       d.execute RDFS_SCHEMA_INDEX
@@ -122,22 +124,51 @@ module RDFS
 
   # Even in production, it's better for RDFS to crash than to have threads die
   # and never run again. Makes it easier to track down issues.
-  Thread.abort_on_exception = true
+  Thread.abort_on_exception = false
+  @update_frequency = RDFS_UPDATE_FREQ
+  @running = true
+
 
   # Start the server
   Thread.new do
     @server = Server.new
   end
-  sleep 1
 
   # Start the updater
-  Thread.new do
-    @updater = Updater.new(RDFS_UPDATE_FREQ)
-  end
-  sleep 1
+  @updater = Updater.new(RDFS_UPDATE_FREQ)
+
 
   # Start the transmitter
-  @transmitter = Transmitter.new(RDFS_TRANSMIT_FREQ)
+
+  @transmitter = Transmitter.new(RDFS_UPDATE_FREQ)
+
+  while true
+    @updater.update_database
+    Thread.pass
+    sleep @update_frequency
+
+    @transmitter.transmit
+    Thread.pass
+    sleep @update_frequency
+
+    @updater.check_for_deleted_files
+    Thread.pass
+    sleep @update_frequency
+
+    @transmitter.transmit
+    Thread.pass
+    sleep @update_frequency
+  end
+
+
+  sleep 1
+
+  #module_function :kernel
+
+  #ernel
+
+  #end
+  sleep 1
 
   puts 'RDFS Shutdown.'
 end

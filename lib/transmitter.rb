@@ -5,7 +5,6 @@ module RDFS
     # Called upon Transmitter.new
     def initialize(transmit_frequency)
       @transmit_frequency = transmit_frequency
-      @running = 1
       # Setup logging inside the updater
       @logger = Logger.new(STDOUT)
       @logger.level = RDFS_DEBUG ? Logger::DEBUG : Logger::WARN
@@ -13,29 +12,22 @@ module RDFS
       @loglvl = Logger::WARN
       @logger.warn {'Transmitter thread started.'.yellow}
       # Create the thread
-      @main_thread = Thread.new kernel
-
     end
 
-    # Stop the transmitter
-    def stop
-      @running = nil
-    end
+    #private
 
-    private
+    #attr_writer :running
+    #attr_accessor :logger
 
-    attr_writer :running
-    attr_accessor :logger
-
-    def kernel
-      while @running
-        # Transmit
-        transmit
-
-        Thread.pass
-        sleep @transmit_frequency
-      end
-    end
+    # def kernel
+    #   while @running
+    #     # Transmit
+    #     # transmit
+    #
+    #     Thread.pass
+    #     sleep @transmit_frequency
+    #   end
+    # end
 
     # Reads a binary file and returns its contents in a string
     def read_file(file)
@@ -74,15 +66,12 @@ module RDFS
               if (updated != 0) && (deleted == 0)
                 # UPDATE
                 begin
-                  response = Net::HTTP.post_form(uri, 'api_call' => 'add_query', 'filename' => filename, 'sha256sum' => sha256sum)
+                  response = Net::HTTP.post_form(uri, 'api_call' => 'add_query', 'filename' => filename, 'sha256' => sha256sum)
                   if response.body.include?('EXISTS')
                   # File exists but with a different filename, so call the add_dup
                   # function to avoid using needless bandwidth
                     @logger.add(@loglvl) {'add double'}
-                    response = Net::HTTP.post_form(uri,
-                                                   'api_call' => 'add_dup',
-                                                   'filename' => filename,
-                                                   'sha256sum' => sha256sum)
+                    response = Net::HTTP.post_form(uri, 'api_call' => 'add_dup', 'filename' => filename, 'sha256' => sha256sum)
                     if response.body.include?('OK')
                       clear_update_flag(filename)
                       next
@@ -97,11 +86,9 @@ module RDFS
                   file_contents = read_file(RDFS_PATH + '/' + filename)
                   file_contents = Base64.encode64(file_contents)
                     # Then push it in a POST call
-                  response = Net::HTTP.post_form(uri,
-                                                   'api_call' => 'add',
-                                                   'filename' => filename,
-                                                   'sha256sum' => sha256sum,
-                                                   'content' => file_contents)
+                  response = Net::HTTP.post_form(uri, 'api_call' => 'add', 'filename' => filename,
+                                                 'sha256' => sha256sum,
+                                                 'content' => file_contents)
                   clear_update_flag(filename) if response.body.include?('OK')
                 rescue StandardError
                   @logger.warn {'Unable to transfer to node at IP ' + ip + '.'}
@@ -115,7 +102,7 @@ module RDFS
                 response = Net::HTTP.post_form(uri,
                                                'api_call' => 'delete',
                                                'filename' => filename,
-                                               'sha256sum' => sha256sum)
+                                               'sha256' => sha256sum)
                 if response.body.include?('OK')
                   set_deleted_done_flag(filename)
                 else

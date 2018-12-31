@@ -8,38 +8,20 @@ module RDFS
     # Called upon Updater.new
     def initialize(update_frequency)
       @update_frequency = update_frequency
-      @running = 1
-
       # Setup logging inside the updater
       @loglvl = Logger::DEBUG #  Logger::WARN default for local log.add
       @logger = Logger.new(STDOUT)
       @logger.level = RDFS_DEBUG ? Logger::DEBUG : Logger::WARN
       @logger.progname = 'updater'.green
       @loglvl = Logger::DEBUG
-
-      # Create the main thread
-      @main_thread = Thread.new kernel
       @logger.debug('Updater thread started.')
+      # Create the main thread
     end
 
-    # Stop the updater
-    def stop
-      @running = nil
-    end
+    #private
 
-    private
-
-    attr_writer :running
+    #attr_writer :running
     attr_accessor :logger
-
-    def kernel
-      while @running
-        update_database
-        check_for_deleted_files
-        Thread.pass
-        sleep @update_frequency
-      end
-    end
 
     # Create SHA256 of a file
     def sha256file(file)
@@ -72,7 +54,7 @@ module RDFS
         @logger.add(Logger::DEBUG) {sql}
         row = RDFS_DB.execute(sql)
         if row.count > 0
-          # It was in the database, so see if it has changed or olf/deleted.
+          # It was in the database, so see if it has changed or old/deleted.
           if last_modified.to_i > row[0][2].to_i || row[0][5] == 1
             # File has changed. Rehash it and updated the database.
             sql = "DELETE FROM files where name= \"#{f}\""

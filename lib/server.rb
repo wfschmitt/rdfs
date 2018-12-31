@@ -1,3 +1,5 @@
+require 'webrick'
+
 module RDFS
   class Server < WEBrick::HTTPServlet::AbstractServlet
     attr_accessor :webrick
@@ -5,7 +7,7 @@ module RDFS
 
     def initialize
       # Setup logging inside the server
-      @logger = ::Logger.new(STDOUT)
+      @logger = ::Logger.new(STDERR)
       @logger.level = RDFS_DEBUG ? Logger::DEBUG : Logger::WARN
       @logger.progname = 'server'.blue
       @loglvl = Logger::WARN
@@ -19,7 +21,7 @@ module RDFS
   end
 
   class Files < WEBrick::HTTPServlet::AbstractServlet
-    attr_accessor :logger
+    #ttr_accessor :logger
 
     # Process a POST request
     def do_POST(request, response)
@@ -45,7 +47,7 @@ module RDFS
         filename = request.query['filename']
         final_filename = RDFS_PATH + '/' + filename
         # Does the path exist? If not, create it.
-        sha256sum = request.query['sha256sum']
+        sha256sum = request.query['sha256']
 
         query = RDFS_DB.prepare('SELECT * FROM files WHERE sha256 = :sha256 AND name = :name AND deleted_done = 0 ')
         query.bind_param('sha256', sha256sum)
@@ -86,7 +88,7 @@ module RDFS
 
       when 'add_dup'
         new_name = request.query['filename']
-        sha256sum = request.query['sha256sum']
+        sha256sum = request.query['sha256']
 
         # Grab the original filename
         query = RDFS_DB.prepare('SELECT name FROM files WHERE deleted_done = 0 AND sha256 = :sha256')
@@ -143,7 +145,7 @@ module RDFS
   end
 
   class Nodes < WEBrick::HTTPServlet::AbstractServlet
-    attr_accessor :logger
+    #tr_accessor :logger
 
     # Process a POST request
     def do_POST(request, response)
