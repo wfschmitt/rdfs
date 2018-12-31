@@ -56,7 +56,7 @@ module RDFS
 
         if row.count > 0
           # this already exists signal sucess
-          @logger.warn('add already exits')
+          #@logger.warn('add already exits')
           return [200, 'text/plain', response_text]
         else
 
