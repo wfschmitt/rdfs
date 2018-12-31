@@ -132,6 +132,7 @@ module RDFS
     @server = Server.new
   end
 
+  sleep 2
   # Start the updater
   @updater = Updater.new(RDFS_UPDATE_FREQ)
 
@@ -158,15 +159,6 @@ module RDFS
     sleep @update_frequency
   end
 
-
-  sleep 1
-
-  #module_function :kernel
-
-  #ernel
-
-  #end
-  sleep 1
 
   puts 'RDFS Shutdown.'
 end

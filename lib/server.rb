@@ -21,7 +21,7 @@ module RDFS
   end
 
   class Files < WEBrick::HTTPServlet::AbstractServlet
-    #ttr_accessor :logger
+    attr_accessor :logger
 
     # Process a POST request
     def do_POST(request, response)
@@ -31,7 +31,7 @@ module RDFS
       response.body = body || "empty"
     end
 
-    private
+    #private
 
     def api_handler(request)
 

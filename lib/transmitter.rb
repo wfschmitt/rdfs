@@ -1,7 +1,5 @@
 module RDFS
   class Transmitter
-    attr_accessor :main_thread
-
     # Called upon Transmitter.new
     def initialize(transmit_frequency)
       @transmit_frequency = transmit_frequency
